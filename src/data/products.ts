@@ -3,14 +3,14 @@ import { Product } from '../types';
 const imagePool = [
   'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&q=80&w=800', // Strings
   'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=800', // Racket on court
-  'https://images.unsplash.com/photo-1617083934555-56dab002d99d?auto=format&fit=crop&q=80&w=800', // Racket and balls
+  'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&q=80&w=900', // Racket and balls
   'https://images.unsplash.com/photo-1589801258579-18e091f4ca26?auto=format&fit=crop&q=80&w=800', // Racket head
   'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?auto=format&fit=crop&q=80&w=800', // Court
-  'https://images.unsplash.com/photo-1572560498038-ce671e4a6fa6?auto=format&fit=crop&q=80&w=800', // Close up
+  'https://images.unsplash.com/photo-1589801258579-18e091f4ca26?auto=format&fit=crop&q=80&w=900', // Close up
   'https://images.unsplash.com/photo-1515523110800-9415d13b84a8?auto=format&fit=crop&q=80&w=800', // Player
   'https://images.unsplash.com/photo-1622618991746-fe6004db3a47?auto=format&fit=crop&q=80&w=800', // Handle
-  'https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/673558759_1587711125670130_3677119398895597751_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=7b2446&_nc_ohc=ZEntYBbKRfYQ7kNvwGQ3ly_&_nc_oc=Adqvj3UMKtzzAP5H9LrcO5gvZ6dPOiT4eStirRvLdKlJRaxf04NSM9-w4LQT0W5Wg9U&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=M1R56MB1DVlVNnzTRygdLg&_nc_ss=7a3a8&oh=00_Af3f1boz3mk17DETt6rzHkKm8uAZstTjWMDewHlHhajwVA&oe=69E986AD',
-  'https://scontent.fhan14-1.fna.fbcdn.net/v/t39.30808-6/673827468_1587715212336388_2649833598560045605_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7b2446&_nc_ohc=XmoOWwvwbawQ7kNvwGpLmhP&_nc_oc=Adrjfin13kyo71nOHjR1YEhJeu8NedCzivLvn925VUu_bmqmfvAxAftQeu9kVJ-ERqc&_nc_zt=23&_nc_ht=scontent.fhan14-1.fna&_nc_gid=J_d5yP8xa019gK6MeYyRNg&_nc_ss=7a3a8&oh=00_Af3iQ_4FTLSgCKeRtIRiq2RXxSGpjgofzODdOjyv8Wdrcw&oe=69E9A40E',
+  'https://cdn.hstatic.net/products/200000931671/vot-tennis-wilson-blade-100ul-v10-wr208411u2__2__1c9a6a927a864132b39d68103f2b1dc9_1024x1024.png',
+  'https://cdn.hstatic.net/products/200000931671/vot-tennis-wilson-blade-100ul-v10-wr208411u2__1__334ea987a87641eaaf6cc749b4d2e7e9_1024x1024.png',
   'https://lh5.googleusercontent.com/proxy/Wd1NSYtv6jYH7V_iqIgZJ85rFcK7tFt62bczKHOK22AkL6rbhaBZoN7scpqBHh-BRw05NkEEvzHDXSqvkDo-cQiSgDaNU0njwQTYTP6GvWBRax6BAcvkwaOKCS9-O0EJdjao4FCiEKmDJg_c6HDwIcTce_g4FWHBpCzl4FpruPGJ_-PNa87f88Ptllh6L2imxWQf0w',
 'https://cdn.hstatic.net/products/200000931671/vot-tennis-wilson-blade-100ul-v10-wr208411u2__2__1c9a6a927a864132b39d68103f2b1dc9_1024x1024.png',
 'https://cdn.hstatic.net/products/200000931671/vot-tennis-wilson-blade-100ul-v10-wr208411u2__1__334ea987a87641eaaf6cc749b4d2e7e9_1024x1024.png',
@@ -48,10 +48,10 @@ const imagePool = [
 'https://cdn.shopvnb.com/uploads/gallery/vot-tennis-yonex-frame-vcore-98-305gr-chinh-hang-3_1718937478.webp',
 'https://cdn.shopvnb.com/uploads/gallery/vot-tennis-yonex-frame-vcore-98-305gr-chinh-hang-4_1718937484.webp',
 'https://cdn.shopvnb.com/uploads/gallery/vot-tennis-yonex-frame-vcore-98-305gr-chinh-hang-2_1718937472.webp',
-'https://cdn.vuahanghieu.com/unsafe/0x900/left/top/smart/filters:quality(90)/https://admin.vuahanghieu.com/upload/product/2023/04/vot-tennis-wilson-clash-100l-v2-0-wr074311u2-mau-den-do-644207d434451-21042023104940.jpg',
-'https://cdn.vuahanghieu.com/unsafe/0x900/left/top/smart/filters:quality(90)/https://admin.vuahanghieu.com/upload/product/2023/04/vot-tennis-wilson-clash-100l-v2-0-wr074311u2-mau-den-do-644207d4253ff-21042023104940.jpg',
-'https://cdn.vuahanghieu.com/unsafe/0x900/left/top/smart/filters:quality(90)/https://admin.vuahanghieu.com/upload/product/2023/04/vot-tennis-wilson-clash-100l-v2-0-wr074311u2-mau-den-do-644207d431291-21042023104940.jpg',
-'https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcS3Cy8cFV72SVRgmL-tgh8m_OWApgrH6MzvbWwfteHSYUs5vSbmD0CdTdPfsHvHJy5JMnrMWcVoXUz7vQdHiJ7DZMCvGWOO99-NWUEmg2bIozDY0rxAJwzkqA',
+'https://product.hstatic.net/200000931671/product/wr125711u2__8__1960113e71664a4082e26db6dd3a0751_1024x1024.jpg',
+'https://cdn.hstatic.net/products/200000931671/wr125711u2__2__fa6480c9eb0648ed93400d141b36edce_4f185e99757f4421a611ce160e28a9d7_1024x1024.jpg',
+'https://cdn.hstatic.net/products/200000931671/wr125711u2__3__9862d870734a478db5842ff4f65f7eab_0b861cdb2c254e24b84d592eff4b252c_1024x1024.jpg',
+'https://cdn.hstatic.net/products/200000931671/wr125711u2__7__bd3cfb006a734b4e87ac586116fb66cd_7b088e7d198640dfb8bf513678280032.jpg',
 'https://trangnguyensport.com/wp-content/uploads/2021/03/Vot-Tennis-Babolat-Pure-Strike-Team-285gr-2-720x720.jpg',
 'https://trangnguyensport.com/wp-content/uploads/2021/03/Vot-Tennis-Babolat-Pure-Strike-Team-285gr-3-1280x1280.jpg',
 'https://trangnguyensport.com/wp-content/uploads/2021/03/Vot-Tennis-Babolat-Pure-Strike-Team-285gr-4-1280x1280.jpg',

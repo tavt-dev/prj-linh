@@ -5,6 +5,24 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { slugify } from '../utils/slug';
 
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&q=80&w=800';
+const BROKEN_IMAGE_PATTERNS = [
+  'photo-1617083934555-56dab002d99d',
+  'photo-1572560498038-ce671e4a6fa6',
+  'scontent.fhan14',
+  'vuahanghieu.com',
+  'admin.vuahanghieu.com',
+];
+
+function sanitizeImages(images?: string[]) {
+  const safeImages = images
+    ?.map((image) => image.trim())
+    .filter(Boolean)
+    .map((image) =>
+      BROKEN_IMAGE_PATTERNS.some((pattern) => image.includes(pattern)) ? DEFAULT_IMAGE : image
+    );
+
+  return safeImages?.length ? safeImages : [DEFAULT_IMAGE];
+}
 
 function normalizeProduct(product: Product): Product {
   const salePrice = product.salePrice && product.salePrice > 0 ? product.salePrice : undefined;
@@ -19,7 +37,7 @@ function normalizeProduct(product: Product): Product {
     ...product,
     slug,
     category: product.category === 'Quả bóng tennis' ? 'Bóng Tennis' : product.category,
-    images: product.images?.length ? product.images : [DEFAULT_IMAGE],
+    images: sanitizeImages(product.images),
     salePrice,
     discountPercent,
     rating: product.rating ?? 5,

@@ -26,7 +26,7 @@ const newsItems = [
     id: 3,
     title: 'Babolat Pure Aero 2024: Vũ khí tạo xoáy tối thượng của Carlos Alcaraz',
     excerpt: 'Khám phá những công nghệ mới được tích hợp trên cây vợt Pure Aero 2024, giúp người chơi tạo ra những cú đánh xoáy topspin uy lực và hiểm hóc như tay vợt số 1 thế giới.',
-    image: 'https://images.unsplash.com/photo-1530915365347-231c4bb4b5b7?auto=format&fit=crop&q=80&w=1000',
+    image: 'https://images.unsplash.com/photo-1530915534664-4ac6423816b7?auto=format&fit=crop&q=80&w=1000',
     date: '08/10/2024',
     author: 'Thanh Bình',
     category: 'Tin tức sản phẩm'
@@ -53,7 +53,7 @@ const newsItems = [
     id: 6,
     title: 'Cách bảo quản vợt tennis để kéo dài tuổi thọ',
     excerpt: 'Những mẹo nhỏ nhưng hữu ích giúp bạn bảo quản cây vợt yêu quý của mình luôn trong tình trạng tốt nhất, từ việc tránh nhiệt độ cao đến cách thay quấn cán định kỳ.',
-    image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34d8?auto=format&fit=crop&q=80&w=1000',
+    image: 'https://images.unsplash.com/photo-1515523110800-9415d13b84a8?auto=format&fit=crop&q=80&w=1000',
     date: '28/09/2024',
     author: 'Thanh Bình',
     category: 'Hướng dẫn'

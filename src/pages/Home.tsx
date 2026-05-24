@@ -1,335 +1,391 @@
-import React from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, ShieldCheck, Truck, RotateCcw, HeadphonesIcon } from 'lucide-react';
-import { useProduct } from '../context/ProductContext';
-import { ProductGrid } from '../components/product/ProductGrid';
-import { Button } from '../components/ui/Button';
+import {
+  ArrowRight,
+  BadgePercent,
+  CheckCircle2,
+  ChevronDown,
+  Clock3,
+  HeadphonesIcon,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Trophy,
+} from 'lucide-react';
 import { motion } from 'motion/react';
+import { useProduct } from '../context/ProductContext';
+import { useToast } from '../context/ToastContext';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { ProductGrid } from '../components/product/ProductGrid';
+import { formatPrice } from '../utils/format';
+
+interface LeadData {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  level: string;
+  interest: string;
+  createdAt: string;
+}
+
+const HERO_IMAGE =
+  'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=85&w=2200';
+
+const COURT_IMAGE =
+  'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&q=85&w=1800';
+
+function getStoredLeads() {
+  try {
+    return JSON.parse(localStorage.getItem('tennis-leads') || '[]') as LeadData[];
+  } catch {
+    return [];
+  }
+}
 
 export function Home() {
   const navigate = useNavigate();
   const { products } = useProduct();
-  const bestSellers = products.filter((p) => p.isBestSeller).slice(0, 4);
-  const newArrivals = products.filter((p) => p.isNew).slice(0, 4);
+  const { addToast } = useToast();
+  const formRef = useRef<HTMLDivElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const features = [
+  const featuredProducts = useMemo(
+    () => products.filter((product) => product.isBestSeller || product.salePrice).slice(0, 4),
+    [products]
+  );
+
+  const heroProduct = featuredProducts[0] || products[0];
+  const heroPrice = heroProduct ? heroProduct.salePrice || heroProduct.price : 0;
+
+  const scrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const handleLeadSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    const lead: LeadData = {
+      id: Date.now().toString(),
+      name: String(formData.get('name') || '').trim(),
+      phone: String(formData.get('phone') || '').trim(),
+      email: String(formData.get('email') || '').trim(),
+      level: String(formData.get('level') || ''),
+      interest: String(formData.get('interest') || ''),
+      createdAt: new Date().toISOString(),
+    };
+
+    if (!lead.name || !lead.phone || !lead.email) {
+      addToast('Vui lòng điền đầy đủ họ tên, số điện thoại và email', 'error');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const leads = getStoredLeads();
+    localStorage.setItem('tennis-leads', JSON.stringify([lead, ...leads]));
+
+    window.setTimeout(() => {
+      setIsSubmitting(false);
+      event.currentTarget.reset();
+      addToast('Đã nhận thông tin. TennisPro sẽ liên hệ tư vấn trong hôm nay.', 'success');
+    }, 600);
+  };
+
+  const benefits = [
     {
-      icon: <Truck className="h-6 w-6" />,
-      title: 'Giao hàng miễn phí',
-      description: 'Cho đơn hàng trên 2.000.000đ',
+      icon: HeadphonesIcon,
+      title: 'Tư vấn đúng lối chơi',
+      description: 'Phân tích trình độ, lực tay và mục tiêu thi đấu để chọn đúng dòng vợt.',
     },
     {
-      icon: <ShieldCheck className="h-6 w-6" />,
-      title: 'Hàng chính hãng 100%',
-      description: 'Cam kết chất lượng tuyệt đối',
+      icon: BadgePercent,
+      title: 'Ưu đãi landing page',
+      description: 'Nhận mã giảm 10% cho đơn hàng đầu tiên sau khi để lại thông tin.',
     },
     {
-      icon: <RotateCcw className="h-6 w-6" />,
-      title: 'Đổi trả dễ dàng',
-      description: 'Trong vòng 7 ngày',
-    },
-    {
-      icon: <HeadphonesIcon className="h-6 w-6" />,
-      title: 'Hỗ trợ 24/7',
-      description: 'Luôn sẵn sàng giải đáp',
+      icon: ShieldCheck,
+      title: 'Hàng chính hãng',
+      description: 'Sản phẩm có nguồn gốc rõ ràng, bảo hành và đổi trả theo chính sách.',
     },
   ];
 
-  const brands = [
-    { name: 'Wilson', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Wilson_Sporting_Goods_logo.svg/2560px-Wilson_Sporting_Goods_logo.svg.png' },
-    { name: 'Babolat', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Babolat_logo.svg/2560px-Babolat_logo.svg.png' },
-    { name: 'Head', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Head_logo.svg/2560px-Head_logo.svg.png' },
-    { name: 'Yonex', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Yonex_logo.svg/2560px-Yonex_logo.svg.png' },
-    { name: 'Nike', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/2560px-Logo_NIKE.svg.png' },
+  const steps = [
+    'Để lại thông tin tư vấn',
+    'Chuyên viên gọi xác nhận nhu cầu',
+    'Nhận gợi ý vợt và mã ưu đãi',
+    'Đặt hàng hoặc thử thêm sản phẩm phù hợp',
   ];
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
-  };
 
   return (
-    <div className="flex flex-col gap-16 pb-16 lg:gap-24 lg:pb-24">
-      {/* Hero Section */}
-      <section className="relative h-[85vh] min-h-[600px] w-full overflow-hidden bg-zinc-50">
-        <motion.img
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 0.15 }}
-          transition={{ duration: 1.5, ease: 'easeOut' }}
-          src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=2000"
-          alt="Tennis Racket"
+    <div className="bg-white">
+      <section className="relative min-h-[calc(100vh-24px)] overflow-hidden bg-zinc-950 pt-24 text-white">
+        <img
+          src={HERO_IMAGE}
+          alt="Vợt tennis trên sân"
           referrerPolicy="no-referrer"
-          className="absolute inset-0 h-full w-full object-cover grayscale opacity-20"
+          className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
-        <div className="absolute inset-0 mx-auto flex max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,9,11,0.94)_0%,rgba(9,9,11,0.78)_42%,rgba(9,9,11,0.18)_100%)]" />
+        <div className="relative mx-auto grid min-h-[calc(100vh-24px)] max-w-7xl grid-cols-1 items-center px-4 pb-24 pt-12 sm:px-6 lg:grid-cols-[1fr_420px] lg:px-8">
           <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="max-w-3xl space-y-8"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-3xl"
           >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/50 px-4 py-2 backdrop-blur-md">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-900">Bộ sưu tập mới 2024</span>
-            </motion.div>
-            <motion.h1 variants={itemVariants} className="text-5xl font-bold tracking-tight text-zinc-950 sm:text-6xl lg:text-8xl leading-[1.1]">
-              Nâng Tầm <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-600 to-zinc-900">Trận Đấu Của Bạn</span>
-            </motion.h1>
-            <motion.p variants={itemVariants} className="max-w-xl text-lg leading-relaxed text-zinc-600 sm:text-xl font-light">
-              Khám phá bộ sưu tập sản phẩm thể thao chuyên nghiệp từ các thương hiệu hàng đầu thế giới. Trải nghiệm sức mạnh, độ xoáy và khả năng kiểm soát tuyệt đỉnh.
-            </motion.p>
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button size="lg" className="bg-zinc-900 text-white hover:bg-zinc-800 h-14 px-8 text-lg rounded-full" onClick={() => navigate('/products')}>
-                Mua ngay
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold backdrop-blur">
+              <Sparkles className="h-4 w-4 text-emerald-300" />
+              Chiến dịch TennisPro Fit Day
+            </div>
+            <h1 className="max-w-4xl text-5xl font-bold leading-[1.04] tracking-tight sm:text-6xl lg:text-7xl">
+              Chọn đúng vợt tennis trong 15 phút
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-200 sm:text-xl">
+              Nhận tư vấn miễn phí theo trình độ, lực tay và phong cách đánh. Đăng ký hôm nay để nhận mã ưu đãi 10% cho bộ vợt đầu tiên.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button size="lg" onClick={scrollToForm} className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400">
+                Nhận tư vấn miễn phí <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button size="lg" variant="outline" className="border-zinc-200 text-zinc-900 hover:bg-zinc-50 h-14 px-8 text-lg rounded-full backdrop-blur-sm" onClick={() => navigate('/products?sale=true')}>
-                Xem khuyến mãi
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate('/products?sale=true')}
+                className="border-white/30 bg-white/5 text-white hover:border-white hover:bg-white/10"
+              >
+                Xem sản phẩm ưu đãi
               </Button>
-            </motion.div>
+            </div>
+            <div className="mt-10 grid max-w-2xl grid-cols-3 gap-4 border-t border-white/15 pt-6">
+              {[
+                ['1.200+', 'khách đã tư vấn'],
+                ['4.8/5', 'điểm hài lòng'],
+                ['10%', 'ưu đãi đăng ký'],
+              ].map(([value, label]) => (
+                <div key={value}>
+                  <div className="text-2xl font-bold text-white">{value}</div>
+                  <div className="mt-1 text-sm text-zinc-300">{label}</div>
+                </div>
+              ))}
+            </div>
           </motion.div>
+
+          {heroProduct && (
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="mt-12 hidden lg:block"
+            >
+              <Link to={`/product/${heroProduct.slug}`} className="group block rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur-md transition hover:bg-white/15">
+                <div className="aspect-[4/5] overflow-hidden rounded-md bg-white">
+                  <img
+                    src={heroProduct.images[0]}
+                    alt={heroProduct.name}
+                    referrerPolicy="no-referrer"
+                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  />
+                </div>
+                <div className="mt-4 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-300">{heroProduct.brand}</p>
+                    <h2 className="mt-1 text-xl font-bold text-white">{heroProduct.name}</h2>
+                  </div>
+                  <div className="text-right text-lg font-bold text-white">{formatPrice(heroPrice)}</div>
+                </div>
+              </Link>
+            </motion.div>
+          )}
         </div>
       </section>
 
-      {/* Features */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 border-y border-zinc-200 py-12"
-        >
-          {features.map((feature, index) => (
-            <motion.div key={index} variants={itemVariants} className="flex items-center gap-4 group">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900 transition-all duration-300 group-hover:bg-zinc-900 group-hover:text-white group-hover:scale-110 group-hover:rotate-3">
-                {feature.icon}
+      <section ref={formRef} className="bg-zinc-50 py-14 lg:py-20">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-700">Form thu lead</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl">
+              Để lại thông tin để nhận tư vấn và mã giảm giá
+            </h2>
+            <p className="mt-4 text-base leading-7 text-zinc-600">
+              Landing page này chỉ tập trung vào một hành động chuyển đổi: thu thông tin khách hàng quan tâm đến vợt tennis và hỗ trợ họ mua đúng sản phẩm.
+            </p>
+            <div className="mt-8 space-y-4">
+              {benefits.map((benefit) => {
+                const Icon = benefit.icon;
+                return (
+                  <div key={benefit.title} className="flex gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-zinc-950">{benefit.title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-zinc-600">{benefit.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+            <form onSubmit={handleLeadSubmit} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <Input name="name" label="Họ và tên" placeholder="Nguyễn Văn A" required />
+              <Input name="phone" label="Số điện thoại" type="tel" placeholder="0901234567" required />
+              <div className="sm:col-span-2">
+                <Input name="email" label="Email" type="email" placeholder="you@example.com" required />
               </div>
               <div>
-                <h3 className="text-base font-bold text-zinc-900">{feature.title}</h3>
-                <p className="text-sm text-zinc-500 mt-0.5">{feature.description}</p>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700">Trình độ chơi</label>
+                <select name="level" className="h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-zinc-900">
+                  <option value="beginner">Người mới chơi</option>
+                  <option value="intermediate">Trung cấp</option>
+                  <option value="advanced">Nâng cao</option>
+                </select>
               </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
-
-      {/* Best Sellers */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-end justify-between mb-10"
-        >
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">Bán Chạy Nhất</h2>
-            <p className="mt-3 text-lg text-zinc-500">Những sản phẩm được yêu thích nhất bởi cộng đồng thể thao.</p>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700">Nhu cầu chính</label>
+                <select name="interest" className="h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-zinc-900">
+                  <option value="control">Tăng kiểm soát</option>
+                  <option value="power">Tăng lực đánh</option>
+                  <option value="spin">Tăng độ xoáy</option>
+                  <option value="comfort">Giảm rung, dễ chơi</option>
+                </select>
+              </div>
+              <div className="sm:col-span-2">
+                <Button type="submit" size="lg" isLoading={isSubmitting} className="w-full bg-zinc-950 hover:bg-zinc-800">
+                  Nhận tư vấn và mã giảm giá
+                </Button>
+                <p className="mt-3 text-center text-xs text-zinc-500">
+                  Thông tin được lưu nội bộ để chăm sóc khách hàng và không hiển thị công khai.
+                </p>
+              </div>
+            </form>
           </div>
-          <Link to="/products?sort=best-selling" className="hidden sm:flex items-center gap-2 text-sm font-bold text-zinc-900 hover:text-zinc-600 transition-colors group">
-            Xem tất cả <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </motion.div>
-        <ProductGrid products={bestSellers} />
-        <div className="mt-10 flex justify-center sm:hidden">
-          <Button variant="outline" className="w-full rounded-full h-12" onClick={() => navigate('/products?sort=best-selling')}>
-            Xem tất cả
-          </Button>
         </div>
       </section>
 
-      {/* Promo Banner */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative overflow-hidden rounded-[2.5rem] bg-zinc-100 group"
-        >
-          <div className="absolute inset-0">
-            <img
-              src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&q=80&w=2000"
-              alt="Promo"
-              referrerPolicy="no-referrer"
-              className="h-full w-full object-cover opacity-20 grayscale transition-transform duration-1000 group-hover:scale-105"
-            />
+      <section className="py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-red-600">Lý do đăng ký</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl">
+                Mua vợt theo cảm tính rất dễ sai thông số
+              </h2>
+              <p className="mt-4 text-base leading-7 text-zinc-600">
+                Trọng lượng, mặt vợt, điểm cân bằng và độ cứng khung ảnh hưởng trực tiếp đến cảm giác bóng. TennisPro rút gọn quá trình chọn vợt bằng bộ câu hỏi tư vấn và danh sách gợi ý phù hợp.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {[
+                ['Sai trọng lượng', 'Dễ mỏi tay, chậm phản xạ khi đánh lâu.'],
+                ['Sai mặt vợt', 'Bóng thiếu kiểm soát hoặc không đủ lực.'],
+                ['Sai grip size', 'Cầm không chắc, tăng rủi ro đau cổ tay.'],
+              ].map(([title, description]) => (
+                <div key={title} className="rounded-lg border border-zinc-200 p-5">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+                  <h3 className="mt-4 font-bold text-zinc-950">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-zinc-600">{description}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent" />
-          <div className="relative flex flex-col items-start justify-center px-8 py-24 sm:px-16 lg:py-32 max-w-2xl">
-            <motion.h2 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl"
-            >
-              Sức Mạnh <br/> Vượt Trội
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              className="mt-6 text-lg text-zinc-600 font-light"
-            >
-              Công nghệ tiên tiến nhất. Thiết kế đột phá. Nâng cấp lối chơi của bạn ngay hôm nay với những siêu phẩm mới nhất từ các thương hiệu hàng đầu.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            >
-              <Button size="lg" className="mt-10 bg-zinc-900 text-white hover:bg-zinc-800 rounded-full h-14 px-8" onClick={() => navigate('/products?new=true')}>
-                Khám phá ngay
-              </Button>
-            </motion.div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* New Arrivals */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-end justify-between mb-10"
-        >
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">Hàng Mới Về</h2>
-            <p className="mt-3 text-lg text-zinc-500">Cập nhật những xu hướng và công nghệ mới nhất.</p>
-          </div>
-          <Link to="/products?sort=newest" className="hidden sm:flex items-center gap-2 text-sm font-bold text-zinc-900 hover:text-zinc-600 transition-colors group">
-            Xem tất cả <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </motion.div>
-        <ProductGrid products={newArrivals} />
-        <div className="mt-10 flex justify-center sm:hidden">
-          <Button variant="outline" className="w-full rounded-full h-12" onClick={() => navigate('/products?sort=newest')}>
-            Xem tất cả
-          </Button>
         </div>
       </section>
 
-      {/* Latest News */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex items-end justify-between mb-10"
-        >
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">Tin Tức Mới Nhất</h2>
-            <p className="mt-3 text-lg text-zinc-500">Cập nhật thông tin và đánh giá từ chuyên gia.</p>
-          </div>
-          <Link to="/news" className="hidden sm:flex items-center gap-2 text-sm font-bold text-zinc-900 hover:text-zinc-600 transition-colors group">
-            Xem tất cả <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </motion.div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              id: 1,
-              title: 'Đánh giá chi tiết Wilson Pro Staff v14: Sự trở lại của huyền thoại',
-              image: 'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&q=80&w=1000',
-              category: 'Đánh giá vợt',
-              date: '15/10/2024'
-            },
-            {
-              id: 2,
-              title: 'Hướng dẫn chọn dây đan vợt phù hợp với lối chơi của bạn',
-              image: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?auto=format&fit=crop&q=80&w=1000',
-              category: 'Hướng dẫn',
-              date: '12/10/2024'
-            },
-            {
-              id: 3,
-              title: 'Babolat Pure Aero 2024: Vũ khí tạo xoáy tối thượng',
-              image: 'https://images.unsplash.com/photo-1530915365347-231c4bb4b5b7?auto=format&fit=crop&q=80&w=1000',
-              category: 'Tin tức sản phẩm',
-              date: '08/10/2024'
-            }
-          ].map((item, index) => (
-            <motion.article
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="group flex flex-col cursor-pointer"
-              onClick={() => navigate(`/news/${item.id}`)}
-            >
-              <div className="relative h-60 overflow-hidden rounded-2xl mb-4">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-zinc-900">
-                  {item.category}
+      <section className="bg-zinc-950 py-16 text-white lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
+            <div className="relative overflow-hidden rounded-lg">
+              <img src={COURT_IMAGE} alt="Bộ vợt tennis" referrerPolicy="no-referrer" className="aspect-[4/3] w-full object-cover" />
+              <div className="absolute bottom-4 left-4 rounded-md bg-white px-4 py-3 text-zinc-950 shadow-lg">
+                <div className="flex items-center gap-2 text-sm font-bold">
+                  <Trophy className="h-4 w-4 text-amber-500" />
+                  Bộ đề xuất theo lối chơi
                 </div>
               </div>
-              <div className="text-xs text-zinc-500 mb-2">{item.date}</div>
-              <h3 className="text-lg font-bold text-zinc-900 line-clamp-2 group-hover:text-zinc-600 transition-colors">
-                {item.title}
-              </h3>
-            </motion.article>
-          ))}
-        </div>
-        <div className="mt-10 flex justify-center sm:hidden">
-          <Button variant="outline" className="w-full rounded-full h-12" onClick={() => navigate('/news')}>
-            Xem tất cả
-          </Button>
+            </div>
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-300">Quy trình chuyển đổi</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Từ khách truy cập thành khách hàng tiềm năng</h2>
+              <div className="mt-8 space-y-4">
+                {steps.map((step, index) => (
+                  <div key={step} className="flex items-center gap-4 border-b border-white/10 pb-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-zinc-950">
+                      {index + 1}
+                    </div>
+                    <p className="font-medium text-zinc-100">{step}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 flex items-center gap-3 text-sm text-zinc-300">
+                <Clock3 className="h-5 w-5 text-emerald-300" />
+                Thời gian phản hồi trung bình trong giờ làm việc: 30 phút
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Brands */}
-      <section className="bg-zinc-50 py-20 lg:py-28 rounded-[3rem] mx-4 sm:mx-6 lg:mx-8 mb-8">
+      <section className="py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center text-3xl font-bold tracking-tight text-zinc-900 mb-16"
-          >
-            Thương Hiệu Hàng Đầu
-          </motion.h2>
-          <motion.div 
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-2 gap-12 md:grid-cols-5 items-center justify-items-center"
-          >
-            {brands.map((brand) => (
-              <motion.div key={brand.name} variants={itemVariants}>
-                <Link to={`/products?brand=${brand.name}`} className="group flex items-center justify-center p-4">
-                  <img 
-                    src={brand.logo} 
-                    alt={brand.name} 
-                    referrerPolicy="no-referrer"
-                    className="h-12 object-contain sm:h-16 opacity-40 grayscale transition-all duration-500 group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-110" 
-                  />
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
+          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-700">Sản phẩm dẫn dắt</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl">Các lựa chọn đang được tư vấn nhiều</h2>
+            </div>
+            <Link to="/products" className="inline-flex items-center gap-2 text-sm font-bold text-zinc-950 hover:text-emerald-700">
+              Xem tất cả sản phẩm <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <ProductGrid products={featuredProducts} />
+        </div>
+      </section>
+
+      <section className="bg-emerald-50 py-16 lg:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-800">Câu hỏi thường gặp</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-zinc-950">Thông tin trước khi đăng ký</h2>
+            </div>
+            <div className="space-y-3">
+              {[
+                ['Tư vấn có mất phí không?', 'Không. Bạn chỉ cần để lại thông tin để đội ngũ TennisPro liên hệ và tư vấn sản phẩm phù hợp.'],
+                ['Mã giảm giá dùng thế nào?', 'Mã TENNIS10 áp dụng khi thanh toán trên website cho đơn hàng hợp lệ.'],
+                ['Tôi chưa biết thông số vợt thì sao?', 'Bạn chỉ cần mô tả trình độ và nhu cầu. Chuyên viên sẽ gợi ý trọng lượng, mặt vợt và grip size.'],
+              ].map(([question, answer]) => (
+                <details key={question} className="group rounded-lg border border-emerald-200 bg-white p-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-zinc-950">
+                    {question}
+                    <ChevronDown className="h-5 w-5 shrink-0 text-emerald-700 transition group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-3 text-sm leading-6 text-zinc-600">{answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-zinc-950 px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-20">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+          <div>
+            <div className="mb-4 flex items-center gap-1 text-amber-300">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star key={star} className="h-5 w-5 fill-current" />
+              ))}
+            </div>
+            <h2 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">
+              Sẵn sàng chọn đúng cây vợt cho trận đấu tiếp theo?
+            </h2>
+          </div>
+          <Button size="lg" onClick={scrollToForm} className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400">
+            Đăng ký ngay <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </div>
       </section>
     </div>
