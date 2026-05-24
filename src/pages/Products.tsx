@@ -33,6 +33,8 @@ export function Products() {
   useEffect(() => {
     if (brandQuery) {
       setSelectedBrands([brandQuery as Brand]);
+    } else {
+      setSelectedBrands([]);
     }
   }, [brandQuery]);
 
@@ -51,7 +53,10 @@ export function Products() {
     if (categoryQuery) {
       const targetCategory = categories.find(c => c.slug === categoryQuery);
       if (targetCategory) {
-        result = result.filter((p) => p.category === targetCategory.name);
+        const acceptedCategoryNames = targetCategory.slug === 'tennis-balls'
+          ? ['Bóng Tennis', 'Quả bóng tennis']
+          : [targetCategory.name];
+        result = result.filter((p) => acceptedCategoryNames.includes(p.category));
       } else {
         // Fallback if not found in context
         result = result.filter((p) => p.category.toLowerCase() === categoryQuery.toLowerCase());
@@ -121,7 +126,7 @@ export function Products() {
     }
 
     return result;
-  }, [searchQuery, saleQuery, categoryQuery, selectedBrands, selectedLevels, priceRange, sortBy, categories, selectedWeights, selectedHeadSizes, selectedBalances]);
+  }, [allProducts, searchQuery, saleQuery, categoryQuery, selectedBrands, selectedLevels, priceRange, sortBy, categories, selectedWeights, selectedHeadSizes, selectedBalances]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-28 pb-8 lg:pt-32 lg:pb-12">

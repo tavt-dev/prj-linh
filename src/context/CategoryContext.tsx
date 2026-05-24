@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export interface Category {
   id: string;
@@ -12,9 +13,9 @@ const initialCategories: Category[] = [
   { id: '2', name: 'Control', slug: 'control', description: 'Vợt kiểm soát' },
   { id: '3', name: 'Spin', slug: 'spin', description: 'Vợt tạo xoáy' },
   { id: '4', name: 'All-Round', slug: 'all-round', description: 'Vợt toàn diện' },
-  { id: '5', name: 'Quả cầu lông', slug: 'shuttlecocks', description: 'Quả cầu lông tiêu chuẩn' },
-  { id: '6', name: 'Bóng Tennis', slug: 'tennis-balls', description: 'Bóng tennis các loại' },
-  { id: '7', name: 'Quần áo thể thao', slug: 'apparel', description: 'Trang phục thi đấu và tập luyện' },
+  { id: '5', name: 'Bóng Tennis', slug: 'tennis-balls', description: 'Bóng tennis các loại' },
+  { id: '6', name: 'Quần áo thể thao', slug: 'apparel', description: 'Trang phục thi đấu và tập luyện' },
+  { id: '7', name: 'Phụ kiện', slug: 'accessories', description: 'Phụ kiện tennis' },
 ];
 
 interface CategoryContextType {
@@ -27,7 +28,7 @@ interface CategoryContextType {
 const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
 
 export function CategoryProvider({ children }: { children: ReactNode }) {
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [categories, setCategories] = useLocalStorage<Category[]>('tennis-categories', initialCategories);
 
   const addCategory = (categoryData: Omit<Category, 'id'>) => {
     const newCategory: Category = {

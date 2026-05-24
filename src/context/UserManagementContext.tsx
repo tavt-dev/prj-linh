@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export interface AdminUser {
   id: string;
@@ -29,7 +30,7 @@ interface UserManagementContextType {
 const UserManagementContext = createContext<UserManagementContextType | undefined>(undefined);
 
 export function UserManagementProvider({ children }: { children: ReactNode }) {
-  const [users, setUsers] = useState<AdminUser[]>(initialUsers);
+  const [users, setUsers] = useLocalStorage<AdminUser[]>('tennis-admin-users', initialUsers);
 
   const addUser = (user: AdminUser) => {
     setUsers(prev => [...prev, user]);

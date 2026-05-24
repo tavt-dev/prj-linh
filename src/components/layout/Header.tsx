@@ -143,7 +143,7 @@ export function Header() {
                         <Link to="/products?category=accessories" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:translate-x-1 transition-all inline-block">Phụ kiện</Link>
                       </li>
                       <li>
-                        <Link to="/guide" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:translate-x-1 transition-all inline-block">Hướng dẫn chọn vợt</Link>
+                        <Link to="/products" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:translate-x-1 transition-all inline-block">Hướng dẫn chọn vợt</Link>
                       </li>
                     </ul>
                   </div>

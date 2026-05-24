@@ -8,52 +8,18 @@ import { useToast } from '../context/ToastContext';
 export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const { loginWithCredentials } = useAuth();
   const navigate = useNavigate();
   const { addToast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Giả lập đăng nhập
-    const defaultAddresses = [
-      {
-        id: '1',
-        name: 'Nguyễn Văn A',
-        phone: '0901 234 567',
-        address: '123 Đường Lê Lợi, Phường Bến Thành, Quận 1, TP. Hồ Chí Minh',
-        isDefault: true,
-        type: 'Nhà riêng'
-      },
-      {
-        id: '2',
-        name: 'Nguyễn Văn A',
-        phone: '0901 234 567',
-        address: 'Tòa nhà Bitexco, Số 2 Hải Triều, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh',
-        isDefault: false,
-        type: 'Công ty'
-      }
-    ];
+    const authenticatedUser = loginWithCredentials(email, password);
 
-    if (email === 'admin@tennispro.vn' && password === 'admin123') {
-      login({
-        id: '1',
-        name: 'Admin',
-        email: 'admin@tennispro.vn',
-        phone: '0901234567',
-        role: 'admin',
-        addresses: defaultAddresses,
-      });
+    if (authenticatedUser?.role === 'admin') {
       addToast('Đăng nhập quản trị viên thành công', 'success');
       navigate('/admin');
-    } else if (email === 'user@example.com' && password === 'user123') {
-      login({
-        id: '2',
-        name: 'Nguyễn Văn A',
-        email: email,
-        phone: '0901234567',
-        role: 'user',
-        addresses: defaultAddresses,
-      });
+    } else if (authenticatedUser) {
       addToast('Đăng nhập thành công', 'success');
       navigate('/');
     } else {

@@ -4,13 +4,15 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useUserManagement } from '../context/UserManagementContext';
 
 export function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { login } = useAuth();
+  const { register } = useAuth();
+  const { addUser } = useUserManagement();
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -20,14 +22,21 @@ export function Register() {
       addToast('Mật khẩu không khớp', 'error');
       return;
     }
-    
-    // Giả lập đăng ký
-    login({
-      id: Date.now().toString(),
-      name: name,
-      email: email,
-      phone: '',
-      role: 'user',
+
+    const newUser = register({ name, email, password });
+    if (!newUser) {
+      addToast('Email đã được sử dụng', 'error');
+      return;
+    }
+
+    addUser({
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      phone: newUser.phone,
+      role: newUser.role,
+      status: 'Hoạt động',
+      joinDate: new Date().toLocaleDateString('vi-VN'),
     });
     addToast('Đăng ký thành công', 'success');
     navigate('/');

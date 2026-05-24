@@ -13,6 +13,8 @@ interface ProductModalProps {
   product?: Product | null;
 }
 
+const BRANDS: Brand[] = ['Wilson', 'Babolat', 'Head', 'Yonex', 'Nike', 'Adidas', 'Dunlop'];
+
 export function ProductModal({ isOpen, onClose, onSave, product }: ProductModalProps) {
   const { categories } = useCategory();
   const defaultCategory = categories.length > 0 ? categories[0].name : 'Control';
@@ -49,9 +51,15 @@ export function ProductModal({ isOpen, onClose, onSave, product }: ProductModalP
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    const parsedValue = name === 'salePrice' && value === ''
+      ? undefined
+      : name === 'price' || name === 'salePrice' || name === 'stock'
+        ? Number(value)
+        : value;
+
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'price' || name === 'salePrice' || name === 'stock' ? Number(value) : value
+      [name]: parsedValue
     }));
   };
 
@@ -98,13 +106,21 @@ export function ProductModal({ isOpen, onClose, onSave, product }: ProductModalP
                   onChange={handleChange}
                   required
                 />
-                <Input
-                  label="Thương hiệu"
-                  name="brand"
-                  value={formData.brand || ''}
-                  onChange={handleChange}
-                  required
-                />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-zinc-700">Thương hiệu</label>
+                  <select
+                    name="brand"
+                    value={formData.brand || ''}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all bg-white text-zinc-900"
+                  >
+                    <option value="" disabled>Chọn thương hiệu</option>
+                    {BRANDS.map(brand => (
+                      <option key={brand} value={brand}>{brand}</option>
+                    ))}
+                  </select>
+                </div>
                 <Input
                   label="Giá bán (VNĐ)"
                   name="price"

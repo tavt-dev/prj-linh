@@ -11,7 +11,7 @@ import { formatPrice } from '../utils/format';
 import { Modal } from '../components/ui/Modal';
 
 export function Checkout() {
-  const { items, cartTotal, clearCart } = useCart();
+  const { items, cartTotal, discount, finalTotal, clearCart } = useCart();
   const { user } = useAuth();
   const { addToast } = useToast();
   const { addOrder } = useOrder();
@@ -42,17 +42,28 @@ export function Checkout() {
     return null;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     let finalAddress = '';
     if (selectedAddressId === 'custom') {
-      finalAddress = customAddress;
+      finalAddress = customAddress.trim();
     } else {
       const addr = user?.addresses?.find(a => a.id === selectedAddressId);
-      finalAddress = addr ? addr.address : customAddress;
+      finalAddress = addr ? addr.address : customAddress.trim();
     }
+
+    if (!finalAddress) {
+      addToast('Vui lòng nhập địa chỉ giao hàng', 'error');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const formData = new FormData(e.currentTarget);
+    const customerName = (formData.get('customerName') as string) || user!.name;
+    const customerPhone = (formData.get('customerPhone') as string) || user!.phone || '';
+    const customerEmail = (formData.get('customerEmail') as string) || user!.email;
 
     const orderMethodMap: Record<string, string> = {
       cod: 'Thanh toán khi nhận hàng (COD)',
@@ -64,12 +75,12 @@ export function Checkout() {
     setTimeout(() => {
       const newOrder = addOrder({
         userId: user!.id,
-        customerName: user!.name,
-        customerEmail: user!.email,
-        customerPhone: user!.phone || '',
+        customerName,
+        customerEmail,
+        customerPhone,
         shippingAddress: finalAddress,
         items: [...items],
-        total: cartTotal,
+        total: finalTotal,
         paymentMethod: orderMethodMap[paymentMethod]
       });
       
@@ -98,10 +109,10 @@ export function Checkout() {
               <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-zinc-100">
                 <h2 className="text-xl font-semibold text-zinc-900 mb-6">Thông tin liên hệ</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <Input label="Họ và tên" placeholder="Nhập họ tên của bạn" defaultValue={user?.name || ''} required />
-                  <Input label="Số điện thoại" type="tel" placeholder="Nhập số điện thoại" defaultValue={user?.phone || ''} required />
+                  <Input name="customerName" label="Họ và tên" placeholder="Nhập họ tên của bạn" defaultValue={user?.name || ''} required />
+                  <Input name="customerPhone" label="Số điện thoại" type="tel" placeholder="Nhập số điện thoại" defaultValue={user?.phone || ''} required />
                   <div className="sm:col-span-2">
-                    <Input label="Email" type="email" placeholder="Nhập địa chỉ email" defaultValue={user?.email || ''} required />
+                    <Input name="customerEmail" label="Email" type="email" placeholder="Nhập địa chỉ email" defaultValue={user?.email || ''} required />
                   </div>
                 </div>
               </div>
@@ -259,6 +270,12 @@ export function Checkout() {
                   <span>Tạm tính</span>
                   <span className="font-medium text-zinc-900">{formatPrice(cartTotal)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-emerald-600">
+                    <span>Giảm giá</span>
+                    <span className="font-medium">-{formatPrice(discount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Phí vận chuyển</span>
                   <span>Miễn phí</span>
@@ -268,7 +285,7 @@ export function Checkout() {
               <div className="border-t border-zinc-200 pt-4 mb-8">
                 <div className="flex justify-between items-center">
                   <span className="text-base font-semibold text-zinc-900">Tổng cộng</span>
-                  <span className="text-2xl font-bold text-zinc-900">{formatPrice(cartTotal)}</span>
+                  <span className="text-2xl font-bold text-zinc-900">{formatPrice(finalTotal)}</span>
                 </div>
               </div>
 

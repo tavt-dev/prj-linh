@@ -5,6 +5,7 @@ import { useProduct } from '../../context/ProductContext';
 import { ProductModal } from '../../components/admin/ProductModal';
 import { Product } from '../../types';
 import { useCategory } from '../../context/CategoryContext';
+import { slugify } from '../../utils/slug';
 
 export function AdminProducts() {
   const { products: initialProducts, addProduct, updateProduct, deleteProduct } = useProduct();
@@ -15,13 +16,27 @@ export function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const handleSaveProduct = (productData: Partial<Product>) => {
+    const normalizedSalePrice = productData.salePrice && productData.salePrice > 0 ? productData.salePrice : undefined;
+    const normalizedPrice = productData.price || 0;
+    const normalizedProductData = {
+      ...productData,
+      slug: slugify(productData.name || editingProduct?.name || ''),
+      salePrice: normalizedSalePrice,
+      discountPercent: normalizedSalePrice && normalizedPrice
+        ? Math.round(((normalizedPrice - normalizedSalePrice) / normalizedPrice) * 100)
+        : undefined,
+      images: productData.images?.length
+        ? productData.images
+        : ['https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&q=80&w=800'],
+      specifications: productData.specifications || editingProduct?.specifications || {},
+    };
+
     if (editingProduct) {
-      updateProduct(editingProduct.id, productData);
+      updateProduct(editingProduct.id, normalizedProductData);
     } else {
       addProduct({
-        ...productData,
+        ...normalizedProductData,
         id: Date.now().toString(),
-        slug: productData.name?.toLowerCase().replace(/ /g, '-') || '',
         rating: 5,
         reviewsCount: 0,
         level: ['Beginner'],

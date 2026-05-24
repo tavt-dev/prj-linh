@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Category } from '../../context/CategoryContext';
 import { motion, AnimatePresence } from 'motion/react';
+import { slugify } from '../../utils/slug';
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -39,7 +40,11 @@ export function CategoryModal({ isOpen, onClose, onSave, category }: CategoryMod
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'name' && !category ? { slug: slugify(value) } : {}),
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -10,25 +10,20 @@ import { formatPrice } from '../utils/format';
 import { useToast } from '../context/ToastContext';
 
 export function Cart() {
-  const { items, cartTotal } = useCart();
+  const { items, cartTotal, discount, finalTotal, couponCode: appliedCouponCode, applyCoupon } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [couponCode, setCouponCode] = useState('');
-  const [discount, setDiscount] = useState(0);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
-    if (couponCode.toUpperCase() === 'TENNIS10') {
-      setDiscount(cartTotal * 0.1);
+    if (applyCoupon(couponCode)) {
       addToast('Áp dụng mã giảm giá thành công!', 'success');
     } else {
       addToast('Mã giảm giá không hợp lệ', 'error');
-      setDiscount(0);
     }
   };
-
-  const finalTotal = cartTotal - discount;
 
   const handleCheckout = () => {
     if (!user) {
@@ -108,7 +103,7 @@ export function Cart() {
                 <Input
                   id="coupon"
                   placeholder="Nhập mã..."
-                  value={couponCode}
+                  value={couponCode || appliedCouponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
                   className="flex-1"
                 />

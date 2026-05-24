@@ -9,6 +9,11 @@ interface CartContextType {
   removeFromCart: (productId: string, gripSize: string) => void;
   updateQuantity: (productId: string, gripSize: string, quantity: number) => void;
   clearCart: () => void;
+  couponCode: string;
+  discount: number;
+  finalTotal: number;
+  applyCoupon: (code: string) => boolean;
+  clearCoupon: () => void;
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
   cartTotal: number;
@@ -19,22 +24,29 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useLocalStorage<CartItem[]>('tennis-cart', []);
+  const [couponCode, setCouponCode] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { addToast } = useToast();
 
   const addToCart = (product: Product, quantity: number, gripSize: string) => {
+    const safeQuantity = Math.max(1, Math.min(quantity, product.stock));
+    const safeGripSize = gripSize || product.gripSizes[0] || 'Standard';
+
     setItems((prevItems) => {
       const existingItemIndex = prevItems.findIndex(
-        (item) => item.product.id === product.id && item.gripSize === gripSize
+        (item) => item.product.id === product.id && item.gripSize === safeGripSize
       );
 
       if (existingItemIndex > -1) {
         const newItems = [...prevItems];
-        newItems[existingItemIndex].quantity += quantity;
+        newItems[existingItemIndex].quantity = Math.min(
+          product.stock,
+          newItems[existingItemIndex].quantity + safeQuantity
+        );
         return newItems;
       }
 
-      return [...prevItems, { product, quantity, gripSize }];
+      return [...prevItems, { product, quantity: safeQuantity, gripSize: safeGripSize }];
     });
     addToast(`Đã thêm ${product.name} vào giỏ hàng`);
     setIsCartOpen(true);
@@ -54,7 +66,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setItems((prevItems) =>
       prevItems.map((item) =>
         item.product.id === productId && item.gripSize === gripSize
-          ? { ...item, quantity }
+          ? { ...item, quantity: Math.min(quantity, item.product.stock) }
           : item
       )
     );
@@ -62,6 +74,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = () => {
     setItems([]);
+    setCouponCode('');
   };
 
   const cartTotal = items.reduce(
@@ -70,6 +83,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   const cartCount = items.reduce((count, item) => count + item.quantity, 0);
+  const discount = couponCode === 'TENNIS10' ? cartTotal * 0.1 : 0;
+  const finalTotal = Math.max(0, cartTotal - discount);
+
+  const applyCoupon = (code: string) => {
+    const normalizedCode = code.trim().toUpperCase();
+    if (normalizedCode === 'TENNIS10') {
+      setCouponCode(normalizedCode);
+      return true;
+    }
+    setCouponCode('');
+    return false;
+  };
+
+  const clearCoupon = () => {
+    setCouponCode('');
+  };
 
   return (
     <CartContext.Provider
@@ -79,6 +108,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         removeFromCart,
         updateQuantity,
         clearCart,
+        couponCode,
+        discount,
+        finalTotal,
+        applyCoupon,
+        clearCoupon,
         isCartOpen,
         setIsCartOpen,
         cartTotal,
